@@ -1,45 +1,10 @@
-# framework-canvas
+PROYECTO PACMAN
 
-Licencia: MIT
+INTEGRANTES:
 
-Con este pequeño ejemplo, los estudiantes podrán crear pequeñas animaciones usando JavaScript. Para usarlo, solo debe clonar este repositorio. Se debería usar junto con este [repositorio para manejo de listas](https://github.com/andcastillo/functional-light) 
+1.Diego Armando Espinosa Ossa - 1942206 2.Nicolás Lenis Mendoza - 1631205 3.Karen Paola Moreno Palacios - 1940254- 4.Cristian Camilo Llanos Alvarez - 1943852
 
-La documentación de la librería con la cúal pueden realizar los gráficos es [processing.js](http://processingjs.org/reference/). Vayan para saber sobre todas las posibilidades de la librería.
 
-## basic
-
-El punto de entrada para entender cómo funciona el framework es el archivo [basic.html](basic.html). En este ejemplo se pinta un cuadrado que definimos usando una estructura. Por ahora no tiene ningun tipo de animación o interactividad.
-
-``` js
- const square = { x: 100, y: 100, ancho: 100, alto: 100 };
- ...
- // Esta es la función que pinta todo. Se ejecuta 60 veces por segundo
- processing.draw = function () {
-    /**
-     *Dibuja algo en el canvas
-    */
-    processing.background(10, 200, 50);
-    processing.fill(240, 240, 240);
-    processing.rect(square.x, square.y, square.ancho, square.alto);
-};
-
-``` 
-
-Esta pequeño sketch tiene ya includa la librería para programación funcional que hemos ido desarrollando durante el curso, luego en cualquier parte podran usar las funciones append, cons, first, rest, isEmpty, isList, length, deepCopy, etc. Ejemplo
-
-``` js
-let { append, cons, first, isEmpty, isList, length, rest } = functionalLight;
-console.log(length(cons(8, [1, 2, 3])));
-
-``` 
-
-## ticEventExample
-
-El segundo ejemplo de este proyecto es [ticEventExample.html](ticEventExample.html). En este ejemplo podrán encontrar un ejemplo sencillo, que mueve el rectángulo del ejemplo anterior, un pixel a la derecha por cada tic del programa. Para controlar la velocidad de refresque, debe cambiarse el parámetro **frameRate(ticsPorSegundo)** dentro de la función **setup()**
-
-``` js
-    processing.setup = function () {
-      processing.frameRate(10);
       ...
 ``` 
 
