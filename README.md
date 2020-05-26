@@ -10,4 +10,6 @@ INTEGRANTES:
 
 4.Cristian Camilo Llanos Alvarez - 1943852
 
+5.Juan Sebastian Roncancio Vargas - 1943003
+
 
