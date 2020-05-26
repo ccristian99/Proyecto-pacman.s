@@ -1,0 +1,1234 @@
+<canvas id="canvas" width="400" height="400"></canvas>
+<script src="web-lib/processing.js"></script>
+<script src="web-lib/functional-light.js"></script>
+<script src="web-lib/buzz.min.js"></script>
+<script>
+  //Vamos a usar http://processingjs.org/
+  // o https://p5js.org/reference/
+  // Importamos las librerias
+  const game = { score: 0, lives: 1 }
+  let { append, cons, first, isEmpty, isList, length, rest } = functionalLight;
+
+  function make(data, attribute) {
+    return Object.assign({}, data, attribute);
+  }
+
+  function forEach(l, f, index = 0) {
+    if (!isEmpty(l)) {
+      f(first(l), index);
+      forEach(rest(l), f, index + 1);
+    }
+  }
+
+
+
+  const WIDTH = 1350;
+  const HEIGHT = 650;
+  const SIZE = 50;
+  const mapa1 =
+    [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 2],
+    [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 3, 3, 3, 3, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
+    [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
+
+  const mapa2 =
+    [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 2],
+    [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 3, 3, 3, 3, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1],
+    [1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
+    [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
+
+  const mapa3 =
+    [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 2],
+    [1, 2, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 3, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 3, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 3, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
+
+  const mapa4 =
+    [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 2],
+    [1, 2, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1],
+    [1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 3, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 3, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 3, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+    [1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]];
+
+  const mapa5 =
+    [
+
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 2],
+      [1, 2, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 2, 1],
+      [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1],
+      [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 3, 3, 3, 3, 1],
+      [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1],
+      [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
+      [1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1],
+      [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1],
+      [1, 2, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+    ];
+
+
+
+//Funcion de processing que crea el estado del mundo
+
+
+  function sketchProc(processing) {
+    /**
+     * Esto se llama antes de iniciar el juego
+     */
+    processing.setup = function () {
+      processing.frameRate(7);
+      processing.size(WIDTH, HEIGHT);
+      m0 = processing.loadImage("images/fondo 2.1.jpg");
+      m1 = processing.loadImage("images/pared 2.1.jpg");
+      //Caras de pacman sin ningun atributo
+      //derecha
+      d1 = processing.loadImage("images/Pac_man_1.png");
+      d2 = processing.loadImage("images/Pac_man_2.png");
+      //abajo
+      ab1 = processing.loadImage("images/Pac_man_1_2.png");
+      ab2 = processing.loadImage("images/Pac_man_2_2.png");
+      //abajo con ojos al otro lado
+      abb1 = processing.loadImage("images/Pac_man_1_2_2.png");
+      abb2 = processing.loadImage("images/Pac_man_2_2_2.png");
+      //izquierda
+      i1 = processing.loadImage("images/Pac_man_1_1.png");
+      i2 = processing.loadImage("images/Pac_man_2_1.png");
+      //arriba
+      ar1 = processing.loadImage("images/Pac_man_1_3.png");
+      ar2 = processing.loadImage("images/Pac_man_2_3.png");
+      //arriba con ojos al otro lado
+      arr1 = processing.loadImage("images/Pac_man_1_3_2.png");
+      arr2 = processing.loadImage("images/Pac_man_2_3_2.png");
+      //Derecha con atributo de comer fantasmas
+      dc1 = processing.loadImage("images/Rage_1.png");
+      dc2 = processing.loadImage("images/Rage_2.png");
+      //abajo con atributo de comer fantasmas
+      abc1 = processing.loadImage("images/Rage_1_2.png");
+      abc2 = processing.loadImage("images/Rage_2_2.png");
+      //abajo con ojos al otro lado con atributo de comer fantasmas
+      abbc1 = processing.loadImage("images/Rage_1_2_2.png");
+      abbc2 = processing.loadImage("images/Rage_2_2_2.png");
+      //izquierda con atributo de comer fantasmas
+      ic1 = processing.loadImage("images/Rage_1_1.png");
+      ic2 = processing.loadImage("images/Rage_2_1.png");
+      //arriba con atributo de comer fantasmas
+      arc1 = processing.loadImage("images/Rage_1_3.png");
+      arc2 = processing.loadImage("images/Rage_2_3.png");
+      //arriba con ojos al otro lado con atributo de comer fantasmas
+      arrc1 = processing.loadImage("images/Rage_1_3_2.png");
+      arrc2 = processing.loadImage("images/Rage_2_3_2.png");
+      //imagenes galletas
+      g0 = processing.loadImage("images/galleta11.png");
+      g1 = processing.loadImage("images/galleta2.png");
+      g2 = processing.loadImage("images/galleta3.jpg")
+      //imagenes fantasmas
+      f1 = processing.loadImage("images/Rojo_1.png");
+      f2 = processing.loadImage("images/Rosa_1.png");
+      f3 = processing.loadImage("images/Naranja_1.png");
+      f4 = processing.loadImage("images/Cyan_1.png");
+      f6 = processing.loadImage("images/Scared_1.png");
+      f5 = processing.loadImage("images/Dead_2.png");
+      //screamer
+      en = processing.loadImage("images/screamer.jpg");
+      //final
+      fin = processing.loadImage("images/end.jpg");
+
+
+      processing.state = {
+        time: 0,
+        pacman: {
+          dx: 50, dy: 0, x: 50, y: 250, z: d1, z1: d2, z2: i1, z3: i2, z4: ab1,
+          z5: ab2, z6: ar1, z7: ar2, w: dc1, w1: dc2, w2: ic1, w3: ic2, w4: abc1, w5: abc2, w6: arc1, w7: arc2
+        },
+        score: 0000,
+        cookies: [],
+        cookiesG: [],
+        ghostR: { dx: 50, dy: 50, x: 250, y: 150, s: f1, s1: f6, s2: f5, vivo: true },
+        ghostP: { dx: 50, dy: 0, x: 100, y: 150, s: f2, s1: f6, s2: f5, vivo: true },
+        ghostO: { dx: 50, dy: 0, x: 150, y: 150, s: f3, s1: f6, s2: f5, vivo: true },
+        ghostC: { dx: 50, dy: 0, x: 50, y: 150, s: f4, s1: f6, s2: f5, vivo: true },
+        direction: "right",
+        inicio: new buzz.sound("sonidos/fondo1", { formats: ["mp3"], volume: 45,preloand:true,loop:true}),
+        comer: new buzz.sound("sonidos/comer", { formats: ["mp3"], volume: 5 }),
+        galletaC: new buzz.sound("sonidos/g", { formats: ["mp3"], volume: 2, preloand: true, }),
+        m : new buzz.sound("sonidos/muerte",{ formats :["mp3"],volumen:500, preloand : true }),
+        map: mapa1,
+
+        powerup: { po: false, powertime1: 61, powertime2: 61, powertime3: 61, powertime4: 61, powertimeP: 61 },
+        prueba: { x: 250, y: 150 },
+        prueba2: { x: 650, y: 550 }, 
+        prueba3: { x: 1250, y: 350 },
+        end: 1000000001
+
+      };
+
+    }
+  
+
+
+    /**Funcion que posiciona la imagen de la galleta en un lugar especifico
+    @param {list} mapa
+    @return {List}
+    @example generarGalletas([1,0,0,0,0,0,0,0,1])// pone la imagen de la galleta  cada vez que se encuentra un 0
+    */
+  function generarGalletas(mapa) {
+      galletas = []
+      forEach(mapa, (row, i) => {
+        forEach(row, (cell, j) => {
+          if (cell == 0) {
+            galletas = append(galletas, { x: j * SIZE, y: i * SIZE })
+            
+          }
+        });
+      });
+      return galletas
+
+    }
+
+/**Funcion que posiciona la imagen de la galleta en un lugar especifico
+    @param {list} mapa
+    @return {List}
+    @example generarGalletasG([1,2,2,2,2,2,2,2,1])// pone la imagen de la galleta  cada vez que se encuentra un 2
+    */
+
+    function generarGalletasG(mapa) {
+      galletasG = []
+      forEach(mapa, (row, i) => {
+        forEach(row, (cell, j) => {
+          if (cell == 2) {
+            galletasG = append(galletasG, { x: j * SIZE, y: i * SIZE })
+            
+          }
+        });
+      });
+      return galletasG
+    }
+
+
+/**Funcion que elimina una imagen si su posición coincide con la de pac-man
+    @param {list} galleta
+    @param {list} lista
+    @return {List} 
+    @example generarGalletas([1,0,0,0,0,0,0,0,1])// quita la imagen de la galleta  cada vez que pac-man se encuentra un 0
+    */
+
+
+    function quitarGalleta(galleta, lista) {
+      if (isEmpty(lista)) {
+        return null
+      }
+      else if (first(lista).x == galleta.x && first(lista).y == galleta.y) {
+        return rest(lista)
+       
+      }
+      else {
+        return cons(first(lista), quitarGalleta(galleta, rest(lista)))
+      }
+    }
+
+
+
+
+
+    /**funcion que determina donde es valido moverse
+    @param {array} pos
+    @param {array} mapa
+    @return {boolean}
+    @example isValid({x:world.pacman.x,y:world.pacman.y},mapa2)// true o false dependiendo si hay un 1 en el arreglo de mapa
+    */
+    function isValid(pos, mapa) {
+      casillaseleccionada = mapa[Math.floor(pos.y / 50)][Math.floor(pos.x / 50)]
+      if (pos.x >= 0 && pos.x < length(first(mapa)) * SIZE && pos.y >= 0 && pos.y < length(mapa) * SIZE) {
+        if (casillaseleccionada != 1) {
+
+          return true;
+          
+        }
+      }
+
+      return false
+    }
+
+    
+    /**funcion que permite los movimientos en las 4  direcciones
+    @param {array} pos
+    @param {List} mapa
+    @return {List}
+    @example posiblesMovimientos(x:world.ghostR.x,mapa3)// Cambia la posicion x ó y dependiendo si es valido o no
+    */
+    function posiblesMovimientos(pos, mapa) {
+      mov = []
+      //se puede mover arriba?
+      if (isValid({ x: pos.x, y: pos.y - 50 }, mapa)) {
+        mov = cons({ x: pos.x, y: pos.y - 50 }, mov)
+      }
+      //se puede mover abajo?
+      if (isValid({ x: pos.x, y: pos.y + 50 }, mapa)) {
+        mov = cons({ x: pos.x, y: pos.y + 50 }, mov)
+      }
+      //se puede mover a la izquierda?
+      if (isValid({ x: pos.x - 50, y: pos.y }, mapa)) {
+        mov = cons({ x: pos.x - 50, y: pos.y }, mov)
+      }
+      if (isValid({ x: pos.x + 50, y: pos.y }, mapa)) {
+        mov = cons({ x: pos.x + 50, y: pos.y }, mov)
+      }
+      return mov
+    }
+
+    /**
+        Retorna la posicion a la que se debe mover el fantasma (de las que sean posibles),
+        para estar a la menor distancia posible con el pacman
+        @param {lista} lst
+        @param {array} pacmanX
+        @param {array} pacmanY
+        @param {object} menor
+        @return {Array}
+        @example menorDistancia(lst,pacmanX,pacmanY,menor)// retorna un arreglo con cordenadas x,y
+        */
+    function menorDistancia(lst, pacmanX, pacmanY, menor) {
+      if (isEmpty(lst)) {
+
+
+        return  menor
+      }
+      else {
+        posX = first(lst).x
+        posY = first(lst).y
+        catetoH = Math.abs(pacmanX - posX)
+        catetoV = Math.abs(pacmanY - posY)
+        distanciaActual = Math.pow(catetoH, 2) + Math.pow(catetoV, 2)
+        distanciaMenor = Math.pow(Math.abs(pacmanX - menor.x), 2) + Math.pow(Math.abs(pacmanY - menor.y), 2)
+        if (distanciaActual < distanciaMenor)
+          return menorDistancia(rest(lst), pacmanX, pacmanY, first(lst))
+        else
+          return menorDistancia(rest(lst), pacmanX, pacmanY, menor)
+      }
+    }
+ 
+    /**
+        Función auxiliar para permitir recursividad en menorDistancia
+        @param {lista} lst
+        @param {object} objeto
+        @return {Array}
+        @example calcularMenor(lst,objeto)// calcula la menor distancia del objeto dado 
+        */
+    function calcularMenor(lst, objeto) {
+
+      return menorDistancia(lst, objeto.x, objeto.y, { x: 9000, y: 9000 })
+
+    }
+    function calcularMenor(lst, objeto) {
+
+
+
+      return menorDistancia(lst, objeto.x, objeto.y, { x: 9000, y: 9000 })
+    }
+
+
+
+
+    // Funcion de processing que se encarga de dibujar todo lo que queramos poner en el juego
+    processing.drawGame = function (world) {
+
+
+  
+      processing.background(0, 0, 0);
+          /**
+        Función que dibuja el puntaje del juego en la pantalla
+        @param {number} score
+        @return {String}
+        @example drawScore(score)// "Score"
+        */
+
+      function drawScore(score) {
+        processing.textFont(processing.PFont, 18);
+        processing.text("Score: " + score, 10, 625);
+      }
+        /**
+        Función que dibuja el puntaje del juego en la pantalla
+        @param {number} lives
+        @return {String}
+        @example drawScore(score)// "Vidas" 
+        */
+      function drawLives(lives) {
+        processing.textFont(processing.PFont, 18);
+        processing.text("Vidas: " + lives, 150, 625);
+
+      }
+
+      //Dibuja el mapa segun el mapa alojado en el estado.
+      forEach(world.map, (row, i) => {
+        forEach(row, (cell, j) => {
+          if (cell == 1) {
+            processing.image(m1, j * SIZE, i * SIZE)
+          } if (cell == 0) {
+            processing.image(m0, j * SIZE, i * SIZE)
+          } if (cell == 2) {
+            processing.image(m0, j * SIZE, i * SIZE)
+          } if (cell == 3) {
+
+            processing.image(m0, j * SIZE, i * SIZE);
+          }
+        });
+      });
+
+      if (world.score == 0) {
+        world.map = mapa1
+        world.cookies = generarGalletas(world.map)
+        world.cookiesG = generarGalletasG(world.map)
+      }
+
+
+
+      //Esta función se encarga de dibujar 
+
+       /**
+        Función que dibuja las galletas en el mapa segun la condicion dada y ademas, suma al puntaje cuando se la comen
+        @param {List} cookies
+        @return {List}
+        @example drawGalletas(g0)// pone todas las galletas g0 en el mapa
+        */
+
+      function drawGalletas(cookies) {
+        if (isEmpty(cookies))
+          return null
+        espGalleta = first(cookies)
+        processing.image(g0, espGalleta.x, espGalleta.y);
+        //Comprobación de si pacman se ha comido una galleta.
+        if (((world.pacman.x == espGalleta.x) && (world.pacman.y == espGalleta.y))) {
+          world.score = world.score + 100
+          world.cookies = quitarGalleta(espGalleta, world.cookies)
+        }
+        return drawGalletas(rest(cookies));
+      }
+      drawGalletas(world.cookies);
+      drawScore(world.score);
+
+      /**
+        Función que dibuja las galletas grandes en el mapa segun la condicion dada
+        @param {List} cookies
+        @return {List}
+        @example drawGalletasG(g1)// pone todas las galletas g1 en el mapa
+        */
+
+      function drawGalletasG(cookies) {
+        if (isEmpty(cookies))
+          return null
+        false;
+        espGalleta = first(cookies)
+        processing.image(g1, espGalleta.x, espGalleta.y, SIZE, SIZE);
+        //Comprobación de si pacman se ha comido una galleta.
+        if (((world.pacman.x == espGalleta.x) && (world.pacman.y == espGalleta.y))) {
+
+          world.cookiesG = quitarGalleta(espGalleta, world.cookiesG)
+          world.powerup.po = true;
+         
+          world.galletaC.play();
+          
+         
+          
+
+          
+          
+        } if (((world.pacman.x != espGalleta.x) && (world.pacman.y != espGalleta.y))) {
+         
+          world.powerup.po = false;
+          
+        }
+
+        return drawGalletasG(rest(cookies));s
+
+      }
+      world.comer.play();
+      world.inicio.play();
+      drawGalletasG(world.cookiesG)
+
+
+      //DERECHA(ANIMACIONES)
+
+      /**
+        Función que dibuja el pac-man normal segun la direccion que se le indique
+        */
+
+      function drawPacman1() {
+        if (world.direction == "right") {
+          if (world.time % 2 == 0)
+            processing.image(world.pacman.z, world.pacman.x, world.pacman.y, SIZE, SIZE);
+          else processing.image(world.pacman.z1, world.pacman.x, world.pacman.y, SIZE, SIZE);
+        }
+        //IZQUIERDA(ANIMACIONES)
+        if (world.direction == "left") {
+          if (world.time % 2 == 0)
+            processing.image(world.pacman.z2, world.pacman.x, world.pacman.y, SIZE, SIZE);
+          else processing.image(world.pacman.z3, world.pacman.x, world.pacman.y, SIZE, SIZE);
+        }
+        //ABAJO(ANIMACIONES)
+        if (world.direction == "down") {
+          if (world.time % 2 == 0)
+            processing.image(world.pacman.z4, world.pacman.x, world.pacman.y, SIZE, SIZE);
+          else processing.image(world.pacman.z5, world.pacman.x, world.pacman.y, SIZE, SIZE);
+        }
+        //ARRIBA(ANIMACIONES)
+        if (world.direction == "up") {
+          if (world.time % 2 == 0)
+            processing.image(world.pacman.z6, world.pacman.x, world.pacman.y, SIZE, SIZE);
+          else processing.image(world.pacman.z7, world.pacman.x, world.pacman.y, SIZE, SIZE);
+        }
+      }
+
+      /**
+        Función que dibuja el pac-man asustado segun la direccion que se le indique
+       */
+
+      function drawPacman2() {
+
+
+        //DERECHA(ANIMACIONES)
+        if (world.direction == "right") {
+          if (world.time % 2 == 0)
+            processing.image(world.pacman.w, world.pacman.x, world.pacman.y, SIZE, SIZE);
+          else processing.image(world.pacman.w1, world.pacman.x, world.pacman.y, SIZE, SIZE);
+        }
+        //IZQUIERDA(ANIMACIONES)
+        if (world.direction == "left") {
+          if (world.time % 2 == 0)
+            processing.image(world.pacman.w2, world.pacman.x, world.pacman.y, SIZE, SIZE);
+          else processing.image(world.pacman.w3, world.pacman.x, world.pacman.y, SIZE, SIZE);
+        }
+        //ABAJO(ANIMACIONES)
+        if (world.direction == "down") {
+          if (world.time % 2 == 0)
+            processing.image(world.pacman.w4, world.pacman.x, world.pacman.y, SIZE, SIZE);
+          else processing.image(world.pacman.w5, world.pacman.x, world.pacman.y, SIZE, SIZE);
+        }
+        //ARRIBA(ANIMACIONES)
+        if (world.direction == "up") {
+          if (world.time % 2 == 0)
+            processing.image(world.pacman.w6, world.pacman.x, world.pacman.y, SIZE, SIZE);
+          else processing.image(world.pacman.w7, world.pacman.x, world.pacman.y, SIZE, SIZE);
+        }
+      }
+
+      if (world.powerup.po == true) {
+        world.powerup.powertimeP = 0
+      }
+
+      /**
+        Retorna la funcion el pac-man normal o asustado segun la condicion que se le indique
+       */
+
+      function pacmanDefinitivo() {
+        if (world.powerup.powertimeP >= 0 && world.powerup.powertimeP <= 60) {
+          drawPacman2()
+
+        } else {
+          world.galletaC.stop();
+          drawPacman1()
+        }
+
+      }
+
+      pacmanDefinitivo()
+
+
+
+      //}
+
+
+
+      if ((world.ghostR.x == world.pacman.x) && (world.ghostR.y == world.pacman.y)) {
+        world.powerup.powertime1 = 0
+      }
+
+      /**
+        Función que dibuja el fantasma red en el mapa segun la posicion que se le de y ademas cambia su estado, en caso de que este vivo o no
+       */
+
+      function drawRed() {
+
+
+        if (world.powerup.powertimeP >= 0 && world.powerup.powertimeP <= 60 &&
+          (world.powerup.powertime1 >= 0 && world.powerup.powertime1 <= 60)) {
+          processing.image(f6, world.ghostR.x, world.ghostR.y, SIZE, SIZE);
+          world.ghostR.vivo = false
+
+        }
+
+        else {
+          processing.image(f1, world.ghostR.x, world.ghostR.y, SIZE, SIZE);
+          world.ghostR.vivo = true
+        }
+      }
+
+      /**
+          if(world.powerup.po == true){
+                world.powerup.powertime2 = 40
+                
+              }
+              */
+      if ((world.ghostP.x == world.pacman.x) && (world.ghostP.y == world.pacman.y)) {
+        world.powerup.powertime2 = 0
+      }
+
+      /**
+        Función que dibuja el fantasma pink en el mapa segun la posicion que se le de y ademas cambia su estado, en caso de que este vivo o no
+        */
+
+      function drawPink() {
+        /**
+        if(world.powerup.powertime2>=40 && world.powerup.powertime2<=70){
+            processing.image(f5, world.ghostP.x, world.ghostP.y, SIZE, SIZE);
+          }
+          */
+        if ((world.powerup.powertimeP >= 0 && world.powerup.powertimeP <= 60) &&
+          (world.powerup.powertime2 >= 0 && world.powerup.powertime2 <= 60)) {
+
+          processing.image(f6, world.ghostP.x, world.ghostP.y, SIZE, SIZE);
+          world.ghostP.vivo = false
+        }
+
+
+
+        else {
+          processing.image(f2, world.ghostP.x, world.ghostP.y, SIZE, SIZE);
+          world.ghostP.vivo = true
+        }
+      }
+
+      /**
+      if(world.powerup.po == true){
+                world.powerup.powertime3 = 40
+                
+              }
+              */
+      if ((world.ghostO.x == world.pacman.x) && (world.ghostO.y == world.pacman.y)) {
+        world.powerup.powertime3 = 0
+      }
+
+      /**
+        Función que dibuja el fantasma orange en el mapa segun la posicion que se le de y ademas cambia su estado, en caso de que este vivo o no
+       */
+
+      function drawOrange() {
+        /**
+        if(world.powerup.powertime3>=40 && world.powerup.powertime3<=70){
+            processing.image(f5, world.ghostO.x, world.ghostO.y, SIZE, SIZE);
+          }
+        */
+        if ((world.powerup.powertimeP >= 0 && world.powerup.powertimeP <= 60) &&
+          (world.powerup.powertime3 >= 0 && world.powerup.powertime3 <= 60)) {
+
+          processing.image(f6, world.ghostO.x, world.ghostO.y, SIZE, SIZE);
+          world.ghostO.vivo = false
+        }
+
+        else {
+          processing.image(f3, world.ghostO.x, world.ghostO.y, SIZE, SIZE);
+          world.ghostO.vivo = true
+
+        }
+      }
+      /**
+          if(world.powerup.po == true){
+                world.powerup.powertime4 = 40
+                
+              }
+      */
+      if ((world.ghostC.x == world.pacman.x) && (world.ghostC.y == world.pacman.y)) {
+        world.powerup.powertime4 = 0
+      }
+
+      /**
+        Función que dibuja el fantasma cyan en el mapa segun la posicion que se le de y ademas cambia su estado, en caso de que este vivo o no
+       */
+
+      function drawCyan() {
+        /**
+        if(world.powerup.powertime4>=40 && world.powerup.powertime4<=70){
+            processing.image(f5, world.ghostC.x, world.ghostC.y, SIZE, SIZE);
+          }
+        */
+        if ((world.powerup.powertimeP >= 0 && world.powerup.powertimeP <= 60) &&
+          (world.powerup.powertime4 >= 0 && world.powerup.powertime4 <= 60)) {
+
+          processing.image(f6, world.ghostC.x, world.ghostC.y, SIZE, SIZE);
+          world.ghostC.vivo = false
+        }
+
+        else {
+          processing.image(f4, world.ghostC.x, world.ghostC.y, SIZE, SIZE);
+          world.ghostC.vivo = true
+
+
+        }
+      }
+
+
+     
+
+
+      drawRed()
+      drawPink()
+      drawOrange()
+      drawCyan()
+
+
+      drawLives(game.lives);
+
+      //Chequea el puntaje y cambia el nivel 
+
+
+      if (world.score == 16600) {
+        world.map = mapa2
+
+        world.cookies = generarGalletas(world.map)
+        world.cookiesG = generarGalletasG(world.map)
+      }
+      else if (world.score == 32200) {
+        world.map = mapa3
+
+        world.cookies = generarGalletas(world.map)
+        world.cookiesG = generarGalletasG(world.map)
+
+      }
+      else if (world.score == 47800) {
+        world.map = mapa4
+
+        world.cookies = generarGalletas(world.map)
+        world.cookiesG = generarGalletasG(world.map)
+
+
+      }
+      else if (world.score == 63400) {
+        world.map = mapa5
+
+        world.cookies = generarGalletas(world.map)
+        world.cookiesG = generarGalletasG(world.map)
+
+
+      }
+      else if (world.score == 79000) {
+        processing.image(end, 0, 0, WIDTH, HIGHT)
+
+      }
+     
+      //Condicciones de pacman tocando a los fantasmas
+      if ((world.ghostR.x == world.pacman.x && world.ghostR.y == world.pacman.y) && (world.powerup.powertimeP >= 61)) {
+        world.end = 0
+      } if ((world.ghostP.x == world.pacman.x && world.ghostP.y == world.pacman.y) && (world.powerup.powertimeP >= 61)) {
+        world.end = 0
+      } if ((world.ghostO.x == world.pacman.x && world.ghostO.y == world.pacman.y) && (world.powerup.powertimeP >= 61)) {
+        world.end = 0
+      } if ((world.ghostC.x == world.pacman.x && world.ghostC.y == world.pacman.y) && (world.powerup.powertimeP >= 61)) {
+        world.end = 0
+      }
+
+      /**
+        Función que para el juego cuando pac-man muere y retorna la imagen de pac-man muerto
+       */
+
+      function dead() {
+      
+        if (world.end >= 0 && world.end <= 1000000000) {
+          processing.image(en, 0, 0, WIDTH, HEIGHT)
+          world.m.play();
+          world.inicio.stop();
+          world.comer.stop();
+          world.galletaC.stop();
+        }
+
+}
+      dead()
+
+
+      
+
+
+      //se le asigna la posición a los fantasmas
+      //TODO: adecuarla para que mueva a todos los fantasmas.
+
+
+    /**funcion que permite los movimientos de los fantasmas
+    @param {array} ghost
+    @return {array}
+    @example moverFantasmas(world.ghostR)// retorna un arreglo con cordenadas x,y para el fantasma
+    */
+
+      
+      function moverFantasmas(ghost) {
+        listaMovimientos = posiblesMovimientos({ x: ghost.x, y: ghost.y }, world.map)
+
+        if (ghost.vivo == false && (world.map == mapa1 || world.map == mapa2)) {
+          listaMovimientos = posiblesMovimientos({ x: ghost.x, y: ghost.y }, world.map)
+          return calcularMenor(listaMovimientos, world.prueba)
+        }
+        else if (ghost.vivo == false && (world.map == mapa3 || world.map == mapa4)) {
+          listaMovimientos = posiblesMovimientos({ x: ghost.x, y: ghost.y }, world.map)
+          return calcularMenor(listaMovimientos, world.prueba2)
+        }
+        else if (ghost.vivo == false && world.map == mapa5) {
+          listaMovimientos = posiblesMovimientos({ x: ghost.x, y: ghost.y }, world.map)
+          return calcularMenor(listaMovimientos, world.prueba3)
+        }
+        else {
+          listaMovimientos = posiblesMovimientos({ x: ghost.x, y: ghost.y }, world.map)
+          return calcularMenor(listaMovimientos, world.pacman)
+        }
+      }
+
+      if (world.time % 4 == 0) {
+        posicionfan = moverFantasmas(world.ghostR)
+        world.ghostR.x = posicionfan.x
+        world.ghostR.y = posicionfan.y
+      }
+      if (world.time % 6 == 0) {
+        posicionfan = moverFantasmas(world.ghostP)
+        world.ghostP.x = posicionfan.x
+        world.ghostP.y = posicionfan.y
+      }
+      if (world.time % 8 == 0) {
+        posicionfan = moverFantasmas(world.ghostO)
+        world.ghostO.x = posicionfan.x
+        world.ghostO.y = posicionfan.y
+      }
+      if (world.time % 2 == 0 && world.time > 60) {
+        posicionfan = moverFantasmas(world.ghostC)
+        world.ghostC.x = posicionfan.x
+        world.ghostC.y = posicionfan.y
+
+      }
+    }
+
+
+
+
+    
+    /**
+
+     * Funcion de processing que cambia los objetos con el tiempo. 
+     */
+    processing.onTic = function (world) {
+      let pacmanX = world.pacman.x
+      let pacmanY = world.pacman.y
+      let fantasmaRX = world.ghostR.x
+      let fantasmaRY = world.ghostR.y
+      let direc = world.direction
+      let pacdx = world.pacman.dx
+      let pacdy = world.pacman.dy
+      let mapa = world.map
+      let ghostRDX = world.ghostR.dx
+      let ghostRDY = world.ghostR.dy
+      
+      // CONDICIONALES QUE CAMBIAN POSICIONES en el plano al pasar de nivel
+      if (world.score == 16600) {
+
+        return make(world, {
+          pacman: {
+            dy: world.pacman.dy,
+            dx: world.pacman.dx,
+            x: 50, y: 250, z: world.pacman.z,
+            z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+            z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+            w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+            w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+          },ghostR:{
+            dx:world.ghostR.dx, dy:world.ghostR.dy,x:250,y:150,s:world.ghostR.s,
+          s1:world.ghostR.s1,s2:world.ghostR.s2,vivo:world.ghostR.vivo},
+          ghostP:{
+            dx:world.ghostP.dx, dy:world.ghostP.dy,x:100,y:150,s:world.ghostP.s,
+          s1:world.ghostP.s1,s2:world.ghostP.s2,vivo:world.ghostP.vivo},
+          ghostO:{
+            dx:world.ghostO.dx, dy:world.ghostO.dy,x:150,y:150,s:world.ghostO.s,
+          s1:world.ghostO.s1,s2:world.ghostO.s2,vivo:world.ghostO.vivo},
+          ghostC:{
+            dx:world.ghostC.dx, dy:world.ghostC.dy,x:50,y:150,s:world.ghostC.s,
+          s1:world.ghostC.s1,s2:world.ghostC.s2,vivo:world.ghostC.vivo},
+          time: 0 })
+      }
+      else if (world.score == 32200) {
+
+        return make(world, {
+          pacman: {
+            dy: world.pacman.dy,
+            dx: world.pacman.dx,
+            x: 500, y: 550, z: world.pacman.z,
+            z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+            z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+            w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+            w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+          },ghostR:{
+            dx:world.ghostR.dx, dy:world.ghostR.dy,x:600,y:400,s:world.ghostR.s,
+          s1:world.ghostR.s1,s2:world.ghostR.s2,vivo:world.ghostR.vivo},
+          ghostP:{
+            dx:world.ghostP.dx, dy:world.ghostP.dy,x:600,y:550,s:world.ghostP.s,
+          s1:world.ghostP.s1,s2:world.ghostP.s2,vivo:world.ghostP.vivo},
+          ghostO:{
+            dx:world.ghostO.dx, dy:world.ghostO.dy,x:600,y:500,s:world.ghostO.s,
+          s1:world.ghostO.s1,s2:world.ghostO.s2,vivo:world.ghostO.vivo},
+          ghostC:{
+            dx:world.ghostC.dx, dy:world.ghostC.dy,x:600,y:550,s:world.ghostC.s,
+          s1:world.ghostC.s1,s2:world.ghostC.s2,vivo:world.ghostC.vivo},
+          time: 0 })
+
+      }
+      else if (world.score == 47800) {
+
+        return make(world, {
+          pacman: {
+            dy: world.pacman.dy,
+            dx: world.pacman.dx,
+            x: 500, y: 550, z: world.pacman.z,
+            z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+            z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+            w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+            w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+          },ghostR:{
+            dx:world.ghostR.dx, dy:world.ghostR.dy,x:600,y:400,s:world.ghostR.s,
+          s1:world.ghostR.s1,s2:world.ghostR.s2,vivo:world.ghostR.vivo},
+          ghostP:{
+            dx:world.ghostP.dx, dy:world.ghostP.dy,x:600,y:550,s:world.ghostP.s,
+          s1:world.ghostP.s1,s2:world.ghostP.s2,vivo:world.ghostP.vivo},
+          ghostO:{
+            dx:world.ghostO.dx, dy:world.ghostO.dy,x:600,y:500,s:world.ghostO.s,
+          s1:world.ghostO.s1,s2:world.ghostO.s2,vivo:world.ghostO.vivo},
+          ghostC:{
+            dx:world.ghostC.dx, dy:world.ghostC.dy,x:600,y:550,s:world.ghostC.s,
+          s1:world.ghostC.s1,s2:world.ghostC.s2,vivo:world.ghostC.vivo},
+          time: 0 })
+
+
+      }
+      else if (world.score == 63400) {
+
+        return make(world, {
+          pacman: {
+            dy: world.pacman.dy,
+            dx: world.pacman.dx,
+            x: 1250, y: 550, z: world.pacman.z,
+            z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+            z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+            w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+            w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+          },ghostR:{
+            dx:world.ghostR.dx, dy:world.ghostR.dy,x:1050,y:300,s:world.ghostR.s,
+          s1:world.ghostR.s1,s2:world.ghostR.s2,vivo:world.ghostR.vivo},
+          ghostP:{
+            dx:world.ghostP.dx, dy:world.ghostP.dy,x:1200,y:300,s:world.ghostP.s,
+          s1:world.ghostP.s1,s2:world.ghostP.s2,vivo:world.ghostP.vivo},
+          ghostO:{
+            dx:world.ghostO.dx, dy:world.ghostO.dy,x:1150,y:300,s:world.ghostO.s,
+          s1:world.ghostO.s1,s2:world.ghostO.s2,vivo:world.ghostO.vivo},
+          ghostC:{
+            dx:world.ghostC.dx, dy:world.ghostC.dy,x:1300,y:300,s:world.ghostC.s,
+          s1:world.ghostC.s1,s2:world.ghostC.s2,vivo:world.ghostC.vivo},
+          time: 0 })
+
+
+      }
+     
+
+
+
+      
+
+      if (direc == "right") {
+        if (!isValid({ x: pacmanX + 50, y: pacmanY }, mapa)) {
+          pacdx = 0
+        }
+
+        return make(world, {
+          time: world.time + 1, pacman: {
+            dy: world.pacman.dy,
+            dx: world.pacman.dx,
+            x: world.pacman.x + pacdx, y: world.pacman.y + world.pacman.dy, z: world.pacman.z,
+            z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+            z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+            w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+            w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+          }, powerup: {
+            po: world.powerup.po, powertime1: world.powerup.powertime1 + 1, powertime2: world.powerup.powertime2 + 1,
+            powertime3: world.powerup.powertime3 + 1, powertime4: world.powerup.powertime4 + 1, powertimeP: world.powerup.powertimeP + 1
+          }, end: world.end + 1
+        });
+
+      } if (direc == "left") {
+        if (!isValid({ x: pacmanX - 50, y: pacmanY }, mapa))
+          pacdx = 0
+
+        return make(world, {
+          time: world.time + 1, pacman: {
+            dy: world.pacman.dy,
+            dx: world.pacman.dx,
+            x: world.pacman.x + pacdx, y: world.pacman.y + world.pacman.dy, z: world.pacman.z,
+            z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+            z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+            w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+            w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+          }, powerup: {
+            po: world.powerup.po, powertime1: world.powerup.powertime1 + 1, powertime2: world.powerup.powertime2 + 1,
+            powertime3: world.powerup.powertime3 + 1, powertime4: world.powerup.powertime4 + 1, powertimeP: world.powerup.powertimeP + 1
+          }, end: world.end + 1
+        });
+
+      } if (direc == "up") {
+        if (!isValid({ x: pacmanX, y: pacmanY - 50 }, mapa)) {
+          pacdy = 0
+        }
+
+        return make(world, {
+          time: world.time + 1, pacman: {
+            dy: world.pacman.dy,
+            dx: world.pacman.dx,
+            x: world.pacman.x + world.pacman.dx, y: world.pacman.y + pacdy, z: world.pacman.z,
+            z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+            z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+            w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+            w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+          }, powerup: {
+            po: world.powerup.po, powertime1: world.powerup.powertime1 + 1, powertime2: world.powerup.powertime2 + 1,
+            powertime3: world.powerup.powertime3 + 1, powertime4: world.powerup.powertime4 + 1, powertimeP: world.powerup.powertimeP + 1
+          }, end: world.end + 1
+        });
+
+      } if (direc == "down") {
+        if (!isValid({ x: pacmanX, y: pacmanY + 50 }, mapa)) {
+          pacdy = 0
+        }
+
+        return make(world, {
+          time: world.time + 1, pacman: {
+            dy: world.pacman.dy,
+            dx: world.pacman.dx,
+            x: world.pacman.x + world.pacman.dx, y: world.pacman.y + pacdy, z: world.pacman.z,
+            z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+            z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+            w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+            w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+          }, powerup: {
+            po: world.powerup.po, powertime1: world.powerup.powertime1 + 1, powertime2: world.powerup.powertime2 + 1,
+            powertime3: world.powerup.powertime3 + 1, powertime4: world.powerup.powertime4 + 1, powertimeP: world.powerup.powertimeP + 1
+          }, end: world.end + 1
+        });
+
+      }
+
+
+    }
+
+    /**
+        * Actualiza el mundo cada vez que se oprime una tecla. Retorna el nuevo estado del mundo
+        */
+
+
+
+
+// Funcion de processing que se encarga de cambiar la direccion con las teclas de flechas del teclado
+
+
+    processing.onKeyEvent = function (world, keyCode) {
+
+      console.log(keyCode);
+      // function movimiento(cookies){
+      switch (keyCode) {
+        //IZQUIERDA
+        case processing.LEFT:
+
+          return make(world, {
+            pacman: {
+              dy: 0, dx: -50, x: world.pacman.x,
+              y: world.pacman.y, z: world.pacman.z, z1: world.pacman.z1,
+              z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+              z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+              w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+              w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+            }, direction: "left"
+          });
+          //}
+          break;
+
+        //DERECHA  
+        case processing.RIGHT:
+
+          return make(world, {
+            pacman: {
+              dy: 0, dx: 50, x: world.pacman.x,
+              y: world.pacman.y, z: world.pacman.z, z1: world.pacman.z1,
+              z2: world.pacman.z2, z3: world.pacman.z3, z4: world.pacman.z4,
+              z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+              w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+              w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+            }, direction: "right"
+          });
+
+          //}
+          break;
+
+        //ABAJO
+
+        case processing.DOWN:
+
+          return make(world, {
+            pacman: {
+              dy: 50, dx: 0, x: world.pacman.x,
+              y: world.pacman.y, z: world.pacman.z,
+              z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3,
+              z4: world.pacman.z4, z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+              w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+              w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+            }, direction: "down"
+          });
+
+          //        }
+          break;
+
+        //ARRIBA
+
+        case processing.UP:
+
+          return make(world, {
+            pacman: {
+              dy: -50, dx: 0, x: world.pacman.x, y: world.pacman.y,
+              z: world.pacman.z, z1: world.pacman.z1, z2: world.pacman.z2, z3: world.pacman.z3,
+              z4: world.pacman.z4, z5: world.pacman.z5, z6: world.pacman.z6, z7: world.pacman.z7, w: world.pacman.w,
+              w1: world.pacman.w1, w2: world.pacman.w2, w3: world.pacman.w3, w4: world.pacman.w4,
+              w5: world.pacman.w5, w6: world.pacman.w6, w7: world.pacman.w7
+            }, direction: "up"
+          });
+          // }
+          break;
+        default:
+          console.log(keyCode);
+          return make(world, {});
+      }
+
+      //    }
+    }
+    processing.onMouseEvent = function (world, event) {
+      return make(world, {});
+    }
+
+
+    // ******************** De aquí hacia abajo no debe cambiar nada. ********************
+
+    // Esta es la función que pinta todo. Se ejecuta 60 veces por segundo. 
+    // No cambie esta función. Su código debe ir en drawGame
+    processing.draw = function () {
+      processing.drawGame(processing.state);
+      processing.state = processing.onTic(processing.state);
+    };
+    processing.Cr = function () {
+      return alert("Creditos:                                                                        Nicolás Lenis Mendoza 1631205                                                 Cristian Camilo Llanos Álvarez 1943852                                               Juan Sebastián Roncancio Vargas 1943003                                    Diego Armando Espinosa 1942206                                                Karen Paola Moreno Palacios 1940254 ");
+    }
+
+    processing.O = function () {
+      return alert("El objetivo del personaje es comer todos los ladrillos de la pantalla, momento en el que se pasa al siguiente nivel o pantalla. Sin embargo, cuatro  monstruos, Shadow (Blinky), Speedy (Pinky), Bashful (Inky) y Pokey (Clyde), recorren el laberinto para intentar capturar a Pac-Man ")
+    }
+
+    processing.i = function () {
+      return alert("1. Dar clic en el juego para poder mover el pacman.                                                                                                                 2. Use las teclas de flechas del teclado para moverse por el laberinto y evitar los fantasmas al tratar de consumir los ladrillos y los ladrillos de plata.                                                                                3. Come todos los ladrillos, al hacerlo avanzarás al siguiente nivel. Cuando comas los ladrillos de plata podrás comerte a los fantasmas, mientras no lo hagas, escapa de  los fantasmas.")
+    }
+
+
+    // Esta función se ejecuta cada vez que presionamos una tecla. 
+    // No cambie esta función. Su código debe ir en onKeyEvent
+    processing.keyPressed = function () {
+      processing.state = processing.onKeyEvent(processing.state, processing.keyCode);
+    }
+
+    // Esta función se ejecuta cada vez movemos el mouse. 
+    // No cambie esta función. Su código debe ir en onKeyEvent
+    processing.mouseMoved = function () {
+      processing.state = processing.onMouseEvent(processing.state,
+        { action: "move", mouseX: processing.mouseX, mouseY: processing.mouseY });
+    }
+
+    // Estas funciones controlan los eventos del mouse. 
+    // No cambie estas funciones. Su código debe ir en OnMouseEvent
+    processing.mouseClicked = function () {
+      processing.state = processing.onMouseEvent(processing.state,
+        { action: "click", mouseX: processing.mouseX, mouseY: processing.mouseY, mouseButton: processing.mouseButton });
+    }
+
+    processing.mouseDragged = function () {
+      processing.state = processing.onMouseEvent(processing.state,
+        { action: "drag", mouseX: processing.mouseX, mouseY: processing.mouseY, mouseButton: processing.mouseButton });
+    }
+
+    processing.mousePressed = function () {
+      processing.state = processing.onMouseEvent(processing.state,
+        { action: "press", mouseX: processing.mouseX, mouseY: processing.mouseY, mouseButton: processing.mouseButton });
+    }
+
+    processing.mouseReleased = function () {
+      processing.state = processing.onMouseEvent(processing.state,
+        { action: "release", mouseX: processing.mouseX, mouseY: processing.mouseY, mouseButton: processing.mouseButton });
+    }
+    // Fin de los eventos del mouse
+  }
+  var canvas = document.getElementById("canvas");
+  // Adjuntamos nuestro sketch al framework de processing
+  var processingInstance = new Processing(canvas, sketchProc);
+
+
+</script>
+
+
+
+</body>
+
+</html>
+
+<canvas id="canvas" width="10" height="8"></canvas>
+<p>
+  <button onClick="processingInstance.setup()">
+    Reiniciar juego
+  </button>
+  <button onClick="processingInstance.O()">
+    objetivo
+  </button>
+  <button onClick="processingInstance.i()">
+    intrucciones
+  </button>
+  <button onClick="processingInstance.Cr()">
+    Creditos
+  </button>
+</p>
